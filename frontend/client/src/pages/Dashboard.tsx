@@ -179,10 +179,24 @@ export default function Dashboard() {
     
     const bankMap: Record<string, { bank: any, totalBalance: number, accounts: any[] }> = {};
     
+    // Define bank names mapping
+    const bankNames: Record<number, string> = {
+      1: 'SBI',
+      2: 'Bank of Baroda',
+      3: 'Punjab National Bank',
+      4: 'RBI',
+      5: 'HDFC Bank',
+      6: 'Union Bank',
+      7: 'ICICI Bank',
+      8: 'Axis Bank',
+      9: 'Bank of India',
+      10: 'Yes Bank'
+    };
+    
     accounts.forEach(account => {
       // Use bankId as key if bank object doesn't exist
       const bankKey = account.bank ? account.bank.id : `unknown-${account.bankId}`;
-      const bankInfo = account.bank || { id: account.bankId, name: 'Unknown Bank' };
+      const bankInfo = account.bank || { id: account.bankId, name: bankNames[account.bankId] || 'Unknown Bank' };
       
       if (!bankMap[bankKey]) {
         bankMap[bankKey] = {
