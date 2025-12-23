@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Navbar, MobileNav } from "@/components/layout/Navbar";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { TransactionList } from "@/components/dashboard/TransactionList";
-import { useUser, useAccounts, useTransactions, useSavingGoals } from "@/hooks/use-finance";
+import { useUser, useAccounts, useTransactions, useSavingGoals, useCards, type Card } from '@/hooks/use-finance';
 import { Input } from "@/components/ui/input";
 import { ButtonCustom } from "@/components/ui/button-custom";
 import { Search, Plus, Bell, Filter, CreditCard, ChevronDown } from "lucide-react";
@@ -112,6 +112,7 @@ export default function Dashboard() {
   const { data: user } = useUser(authUser?.id);
   const { data: accounts } = useAccounts(authUser?.id);
   const { data: savingGoals } = useSavingGoals(authUser?.id);
+  const { data: cards = [] } = useCards(authUser?.id);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
   const [showBankBalances, setShowBankBalances] = useState(false);
@@ -381,15 +382,16 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Linked Accounts */}
+              {/* Linked Accounts and Cards */}
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-bold font-display">My Cards & Accounts</h3>
                   <AddAccountDialogComponent />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Render Accounts */}
                   {accounts?.map((account) => (
-                    <div key={account.id} className="bg-card p-6 rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-all group cursor-pointer relative overflow-hidden">
+                    <div key={`account-${account.id}`} className="bg-card p-6 rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-all group cursor-pointer relative overflow-hidden">
                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                           <CreditCard className="w-24 h-24" />
                        </div>
@@ -404,6 +406,24 @@ export default function Dashboard() {
                           <p className="text-sm text-muted-foreground mb-1">{account.bank?.name}</p>
                           <p className="font-mono text-sm mb-4">**** **** **** {account.accountNumber.slice(-4)}</p>
                           <p className="text-2xl font-bold font-display">${Number(account.balance).toLocaleString()}</p>
+                       </div>
+                    </div>
+                  ))}
+                  {/* Render Cards */}
+                  {cards?.map((card) => (
+                    <div key={`card-${card.id}`} className="bg-card p-6 rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-all group cursor-pointer relative overflow-hidden">
+                       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                          <CreditCard className="w-24 h-24" />
+                       </div>
+                       <div className="relative z-10">
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                               <span className="font-bold text-lg">{card.accountType?.charAt(0)}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-1">{card.accountType} Card</p>
+                          <p className="font-mono text-sm mb-4">**** **** **** {card.cardAccountNumber?.slice(-4)}</p>
+                          <p className="text-2xl font-bold font-display">${Number(card.initialBalance).toLocaleString()}</p>
                        </div>
                     </div>
                   ))}

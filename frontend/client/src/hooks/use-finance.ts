@@ -1,7 +1,34 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, buildUrl, type InsertUser, type InsertAccount } from "@shared/routes";
+import { api, buildUrl } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
 import { apiGet, apiPost, apiPatch } from "@/lib/api";
+
+// Define types that would normally come from schema
+interface InsertUser {
+  username: string;
+  password: string;
+  fullName?: string;
+  email?: string;
+  mobile?: string;
+  city?: string;
+  country?: string;
+  monthlyBudget?: string;
+  currency?: string;
+  appPin?: string;
+  fingerprintEnabled?: boolean;
+  isProfileComplete?: boolean;
+}
+
+interface InsertAccount {
+  userId: number;
+  bankId: number;
+  accountNumber: string;
+  type: string;
+  balance?: string;
+  isLinked?: boolean;
+  loanAmount?: string;
+  loanPaid?: string;
+}
 
 // === USERS ===
 
@@ -26,7 +53,7 @@ export function useUser(id?: number) {
 export function useCreateUser() {
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async (data: InsertUser) => {
+    mutationFn: async (data: any) => {
       try {
         const response = await apiPost(api.users.create.path, data);
         return api.users.create.responses[201].parse(response);
@@ -75,7 +102,7 @@ export function useCreateAccount() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async (data: InsertAccount) => {
+    mutationFn: async (data: any) => {
       const response = await apiPost(api.accounts.create.path, data);
       return api.accounts.create.responses[201].parse(response);
     },
@@ -145,6 +172,30 @@ export function useLoans(userId?: number) {
       const url = `${api.loans.list.path}?userId=${userId}`;
       const data = await apiGet(url);
       return api.loans.list.responses[200].parse(data);
+    },
+    enabled: !!userId,
+  });
+}
+
+// === CARDS ===
+
+export interface Card {
+  id: number;
+  contactNumber: string;
+  cardAccountNumber: string;
+  accountType: string;
+  initialBalance: string;
+  createdAt: string | Date;
+}
+
+export function useCards(userId?: number) {
+  return useQuery<Card[]>({
+    queryKey: ['cards', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const url = `/api/cards?userId=${userId}`;
+      const data = await apiGet(url);
+      return data as Card[];
     },
     enabled: !!userId,
   });
