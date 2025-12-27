@@ -15,6 +15,7 @@ interface CardDetailsModalProps {
     accountType: string;
     initialBalance: string;
     createdAt: string | Date;
+    duePayments?: number;
   } | null;
   transactions: Transaction[];
   isOpen: boolean;
@@ -60,69 +61,87 @@ export function CardDetailsModal({
           </div>
         </DialogHeader>
 
-        <div className="p-6">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-              <p className="text-muted-foreground">Loading card expenses...</p>
+        <div className="p-6 space-y-6">
+          {/* Due Payments Section */}
+          <div className="bg-secondary p-4 rounded-xl">
+            <div className="flex justify-between items-center">
+              <h3 className="font-semibold text-lg">Due Payments</h3>
+              <span className="text-2xl font-bold font-display">
+                ${card?.duePayments !== undefined ? card.duePayments.toFixed(2) : '0.00'}
+              </span>
             </div>
-          ) : transactions.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No transactions found for this card</p>
-            </div>
-          ) : (
-            <ScrollArea className="max-h-[50vh] pr-4">
-              <div className="space-y-4">
-                {transactions.map((transaction) => (
-                  <div 
-                    key={transaction.id} 
-                    className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/40 hover:border-primary/20 transition-all"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center text-muted-foreground">
-                        <span className="font-bold text-lg">
-                          {transaction.category?.charAt(0) || transaction.description?.charAt(0) || 'T'}
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-foreground">
-                          {transaction.description || transaction.category || "Transaction"}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDate(transaction.date)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <span className={`block font-display font-bold text-lg ${
-                        transaction.type === 'credit' ? 'text-green-600' : 'text-foreground'
-                      }`}>
-                        {transaction.type === 'credit' ? '+' : '-'}${Number(transaction.amount).toLocaleString()}
-                      </span>
-                      <div className="flex items-center gap-2 mt-1">
-                        {transaction.category && (
-                          <Badge variant="secondary" className="text-xs capitalize">
-                            {transaction.category}
-                          </Badge>
-                        )}
-                        <Badge 
-                          variant={transaction.type === 'credit' ? 'default' : 'outline'} 
-                          className={`text-xs ${
-                            transaction.type === 'credit' 
-                              ? 'bg-green-100 text-green-800 border-green-200' 
-                              : 'bg-blue-100 text-blue-800 border-blue-200'
-                          }`}
-                        >
-                          {transaction.type}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+            <p className="text-sm text-muted-foreground mt-1">
+              Amount due for this card
+            </p>
+          </div>
+          
+          {/* Expenses Section */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Recent Expenses</h3>
+            
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                <p className="text-muted-foreground">Loading card expenses...</p>
               </div>
-            </ScrollArea>
-          )}
+            ) : transactions.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No transactions found for this card</p>
+              </div>
+            ) : (
+              <ScrollArea className="max-h-[30vh] pr-4">
+                <div className="space-y-4">
+                  {transactions.map((transaction) => (
+                    <div 
+                      key={transaction.id} 
+                      className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/40 hover:border-primary/20 transition-all"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center text-muted-foreground">
+                          <span className="font-bold text-lg">
+                            {transaction.category?.charAt(0) || transaction.description?.charAt(0) || 'T'}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-foreground">
+                            {transaction.description || transaction.category || "Transaction"}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {formatDate(transaction.date)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <span className={`block font-display font-bold text-lg ${
+                          transaction.type === 'credit' ? 'text-green-600' : 'text-foreground'
+                        }`}>
+                          {transaction.type === 'credit' ? '+' : '-'}${Number(transaction.amount).toLocaleString()}
+                        </span>
+                        <div className="flex items-center gap-2 mt-1">
+                          {transaction.category && (
+                            <Badge variant="secondary" className="text-xs capitalize">
+                              {transaction.category}
+                            </Badge>
+                          )}
+                          <Badge 
+                            variant={transaction.type === 'credit' ? 'default' : 'outline'} 
+                            className={`text-xs ${
+                              transaction.type === 'credit' 
+                                ? 'bg-green-100 text-green-800 border-green-200' 
+                                : 'bg-blue-100 text-blue-800 border-blue-200'
+                            }`}
+                          >
+                            {transaction.type}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
